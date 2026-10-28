@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: freelance_marketplace
+          MYSQL_USER: freelance
+          MYSQL_PASSWORD: freelance_pass
+          MYSQL_ROOT_PASSWORD: root_pass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          cd backend
+          sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev build-essential pkg-config
+          pip install -r requirements.txt
+      - name: Run tests
+        env:
+          DB_ENGINE: django.db.backends.mysql
+          MYSQL_DATABASE: freelance_marketplace
+          MYSQL_USER: freelance
+          MYSQL_PASSWORD: freelance_pass
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_PORT: "3306"
+          USE_REDIS: "True"
+          REDIS_URL: redis://127.0.0.1:6379/0
+          DJANGO_SECRET_KEY: test-secret
+          DJANGO_DEBUG: "False"
+          DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+        run: |
+          cd backend
+          python manage.py migrate
+          python manage.py test
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install and build
+        run: |
+          cd frontend
+          npm ci
+          npm run build

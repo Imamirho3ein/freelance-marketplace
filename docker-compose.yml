@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: freelance_marketplace
+      MYSQL_USER: freelance
+      MYSQL_PASSWORD: freelance_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 config.asgi:application"
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_SECRET_KEY: "change-me-in-production"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+      DB_ENGINE: "django.db.backends.mysql"
+      MYSQL_DATABASE: freelance_marketplace
+      MYSQL_USER: freelance
+      MYSQL_PASSWORD: freelance_pass
+      MYSQL_HOST: db
+      MYSQL_PORT: "3306"
+      USE_REDIS: "True"
+      REDIS_URL: "redis://redis:6379/0"
+      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend/media:/app/media
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
