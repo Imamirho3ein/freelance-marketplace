@@ -17,6 +17,24 @@ A full-stack freelance marketplace (Upwork-style) built with **Django REST Frame
 - **API docs** — Auto-generated Swagger/OpenAPI (drf-spectacular)
 - **Dockerized** — One-command setup with MySQL + Redis + Nginx
 
+## 📸 Screenshots
+
+| Home | Projects |
+|---|---|
+| ![Home](docs/screenshots/home.png) | ![Projects](docs/screenshots/projects.png) |
+
+| Project Detail | Freelancers |
+|---|---|
+| ![Project Detail](docs/screenshots/project-detail.png) | ![Freelancers](docs/screenshots/freelancers.png) |
+
+| Dashboard | Messages |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Messages](docs/screenshots/messages.png) |
+
+| Admin | API Docs |
+|---|---|
+| ![Admin](docs/screenshots/admin.png) | ![API Docs](docs/screenshots/api-docs.png) |
+
 ## 🏗 Architecture
 
 ```
