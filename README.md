@@ -73,9 +73,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000/api/v1/
-- Swagger: http://localhost:8000/api/v1/docs/
+- Frontend: port `5173`
+- Backend API: `/api/v1/`
+- Swagger: `/api/v1/docs/`
 
 ### Local development
 
